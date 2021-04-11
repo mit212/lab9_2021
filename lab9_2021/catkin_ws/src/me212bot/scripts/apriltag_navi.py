@@ -21,8 +21,7 @@ br = tf.TransformBroadcaster()
     
 def main():  
     rospy.sleep(1)
-    
-	thread = threading.Thread(target = constant_vel_loop)
+    thread = threading.Thread(target = constant_vel_loop)
     
     thread.start()
     

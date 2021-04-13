@@ -16,9 +16,9 @@ SerialComm          serialComm;       // serial communication class
 unsigned long       prevTime = 0;
 
 // Activate Forward Kinematics (FK), Inverse Kinematics (IK), and Circular Path Tracking (CIRCLE)
-#define FK
+//#define FK
 //#define IK
-//#define CIRCLE
+#define CIRCLE
 
 // Manipulator dimensions and joint angle limits
 const float l_1 = 0.1524; // link1 lenth (m)
@@ -134,8 +134,8 @@ void loop() {
         serialComm.desiredWV_R;
         prevTime = timer; // update time
     } 
-
-// Joint position from the encoder counts
+	
+  // Joint position from the encoder counts
 
   q_1 = Mot1.read() / C2Rad;    // convert to radians
   q_2 = Mot2.read() / C2Rad;    // convert to radians
@@ -146,6 +146,9 @@ void loop() {
     // Implement the Forward_K() function below to compute the end-effector position.
     // Use set_point_1 and set_point_2 to command angular positions.
     // Try to compare the true position and the actual position of the end-effector.
+
+    set_point_1 = -PI/4;
+    set_point_2 = PI/4;
     
     Forward_K();
 #endif
@@ -157,6 +160,9 @@ void loop() {
     // Use x_e and y_e to give end-effector position.
     // Try to compare the true position and the actual position of the end-effector.
 
+    x_e = 0.15;
+    y_e = 0.1;
+
     Inverse_K();
 #endif
 
@@ -167,6 +173,9 @@ void loop() {
     // You can use the variable i to generate waypoints in each loop.
     // For example, i*(PI/180) will increase the angle by 1 deg per each loop.
     // You can use CircleCenterX, CircleCenterY, and Radius to generate the circular path.
+
+    x_e = CircleCenterX + Radius*cos(i*(PI/180));
+    y_e = CircleCenterY + Radius*sin(i*(PI/180));
 
     Inverse_K(); // Inverse kinematics
     i+=1;
@@ -210,7 +219,7 @@ void loop() {
   Serial.print("sp_2, q_2: ");
   Serial.print(set_point_2);  Serial.print(", ");
   Serial.print(q_2); Serial.print("\t"); // set_point_2, q_2
-
+  
   // Print data read from serial
   Serial.print("serial read 1, serial read 2: ");
   Serial.print(serialComm.desiredWV_L);  Serial.print(", ");
@@ -231,6 +240,8 @@ void Forward_K()
   //TO DO
   //Update x_e and y_e with the forward kinematics equations.
   //You can use l_1, l_2 for the lenth of each link and set_point_1 and set_point_2 for the joint angles.
+  x_e = l_1*cos(set_point_1)+l_2*cos(set_point_1+set_point_2);
+  y_e = l_1*sin(set_point_1)+l_2*sin(set_point_1+set_point_2);
 
 }
 
@@ -243,9 +254,12 @@ void Inverse_K()
   //In the lab2, we have learned how to implement inverse kinematics of the 2 DOF manipulator.
   //You can use l_1, l_2 for the lenth of each link and x_e and y_e for the end-effector position.
   //You can use q_1_ik, and q_2_ik to store the IK solutions.
+  q_2_ik = 2*atan2(sqrt(sq(l_1+l_2)-sq(x_e+y_e)),sqrt(sq(x_e+y_e)-sq(l_1-l_2)));
+  q_1_ik = atan2(y_e,x_e) - atan2(l_2*sin(q_2_ik),l_1+l_2*cos(q_2_ik));
   
-  
-  // position limit constraints (update set_point_1 and set_point_2 when the solutions are within the limits, q1_limit and q2_limit)
+  // position limit constraints (update set_point_1 and set_point_2 when the solutions are within the limits)
+  if (-q2_limit< q_2_ik < q2_limit) set_point_2 = q_2_ik;
+  if (-q1_limit< q_1_ik < q1_limit) set_point_1 = q_1_ik;
 
 }
 

@@ -4,6 +4,7 @@
 # Luke Roberto Oct 2017
 # Jacob Guggenheim March 2019  
 # Jerry Ng March 2019, 2020
+# Phillip Daniel April 2021
 
 import numpy as np
 import cv2  # OpenCV module

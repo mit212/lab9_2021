@@ -23,9 +23,9 @@ const float r = 0.037; // wheel radius (m)
 
 class SerialComm {
   public:
-    float desiredWV_R, desiredWV_L;
+    float y, x;
   
-    SerialComm(): desiredWV_R(0), desiredWV_L(0){
+    SerialComm(): y(0), x(0){
         prevSerialTime = micros();
     }
     void receiveSerialData(){
@@ -38,8 +38,8 @@ class SerialComm {
                 command[i] = tempString.toFloat();
                 commandString = commandString.substring(indexPointer+1);
             }
-            desiredWV_R = command[0];
-            desiredWV_L = command[1];
+            y = command[1];
+            x = command[0];
         }
     }
   private: 

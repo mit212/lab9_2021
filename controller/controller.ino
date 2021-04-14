@@ -15,14 +15,12 @@
 SerialComm          serialComm;       // serial communication class
 unsigned long       prevTime = 0;
 
-// Activate Forward Kinematics (FK), Inverse Kinematics (IK), and Circular Path Tracking (CIRCLE)
-//#define FK
-//#define IK
-#define CIRCLE
+// Inverse Kinematics (IK)
+#define IK
 
 // Manipulator dimensions and joint angle limits
 const float l_1 = 0.1524; // link1 lenth (m)
-const float l_2 = 0.1524; // link2 lenth (m)
+const float l_2 = 0.1778; // link2 lenth (m)
 const float q1_limit = 113.7*PI/180; // joint angle limit for q1 (rad)
 const float q2_limit = 161*PI/180; // joint angle limit for q2 (rad)
 
@@ -48,7 +46,6 @@ float ki_2 = 0.0;
 // comment out both to disable serial output
 
 #define PRINT_DATA
-//#define MATLAB_SERIAL_READ
 
 // ================================================================
 // ===               DFROBOT MOTOR SHIELD DEFINITION            ===
@@ -90,7 +87,7 @@ float CircleCenterX = 0.15;
 float CircleCenterY = 0.1;
 float Radius = 0.05;
 
-float alpha = 0.25;    // low pass filter constant
+float alpha = 0.25,alpha_ref = 0.75;    // low pass filter constant
 unsigned long timer;
 double loop_time = 0.01;
 float Pcontrol, Icontrol, Dcontrol;
@@ -98,9 +95,13 @@ float pwm;
 float vc;
 float set_point_1 = 0; // Set point (desired position) for the motor 1
 float set_point_2 = 0; // Set point (desired position) for the motor 2
-float x_e, y_e; // end-effector position
+float x_e=l_1+l_2, y_e=0, x_e_meas, y_e_meas; // end-effector position
 float q_1_ik, q_2_ik; // inverse kinematics solutions
 int i = 0; // To generate waypoints of the circular path.
+
+// Convert from pixels to inches
+float objectDiameterPixel=13, objectDiameterMeter=.07;
+float scale=objectDiameterMeter/objectDiameterPixel; // meters/pixel
 
 // ================================================================
 // ===                      INITIAL SETUP                       ===
@@ -130,8 +131,6 @@ void loop() {
 // Read position command
   if (timer - prevTime >= PERIOD_MICROS) {
         serialComm.receiveSerialData();
-        serialComm.desiredWV_L;
-        serialComm.desiredWV_R;
         prevTime = timer; // update time
     } 
 	
@@ -140,47 +139,24 @@ void loop() {
   q_1 = Mot1.read() / C2Rad;    // convert to radians
   q_2 = Mot2.read() / C2Rad;    // convert to radians
 
-// Forward Kinematics
-#ifdef FK
-    // TO DO
-    // Implement the Forward_K() function below to compute the end-effector position.
-    // Use set_point_1 and set_point_2 to command angular positions.
-    // Try to compare the true position and the actual position of the end-effector.
-
-    set_point_1 = -PI/4;
-    set_point_2 = PI/4;
-    
-    Forward_K();
-#endif
-
 // Inverse Kinematics
 #ifdef IK
     // TO DO
     // Implement the Inverse_K() function below to compute the inverse kinematics of the manipulator.
     // Use x_e and y_e to give end-effector position.
     // Try to compare the true position and the actual position of the end-effector.
+    
+    x_e_meas=(serialComm.x-100)*scale+l_1+l_2;
+    y_e_meas=(-serialComm.y+62)*scale;
 
-    x_e = 0.15;
-    y_e = 0.1;
+    x_e=alpha_ref*x_e+(1-alpha_ref)*x_e_meas;
+    y_e=alpha_ref*y_e+(1-alpha_ref)*y_e_meas;
+        
+    //x_e=l_1+l_2;
+    //y_e=0;
 
     Inverse_K();
 #endif
-
-// Circular Path
-#ifdef CIRCLE
-    // TO DO
-    // Implement the equation of a circle in parametric form.
-    // You can use the variable i to generate waypoints in each loop.
-    // For example, i*(PI/180) will increase the angle by 1 deg per each loop.
-    // You can use CircleCenterX, CircleCenterY, and Radius to generate the circular path.
-
-    x_e = CircleCenterX + Radius*cos(i*(PI/180));
-    y_e = CircleCenterY + Radius*sin(i*(PI/180));
-
-    Inverse_K(); // Inverse kinematics
-    i+=1;
-#endif
-
 
   // ================================================================
   // ===                    CONTROLLER CODE                       ===
@@ -218,31 +194,12 @@ void loop() {
   Serial.print(q_1); Serial.print("\t"); // set_point_1, q_1
   Serial.print("sp_2, q_2: ");
   Serial.print(set_point_2);  Serial.print(", ");
-  Serial.print(q_2); Serial.print("\t"); // set_point_2, q_2
-  
-  // Print data read from serial
-  Serial.print("serial read 1, serial read 2: ");
-  Serial.print(serialComm.desiredWV_L);  Serial.print(", ");
-  Serial.print(serialComm.desiredWV_R); Serial.print("\t"); // set_point_2, q_2
-  
+  Serial.print(q_2); Serial.print("\t"); // set_point_2, q_2  
   Serial.print("\n");
 #endif
   
   delay(30);
   loop_time = (micros() - timer) / 1000000.0;  //compute actual sample time
-}
-
-// ================================================================
-// ===                   Forward Kinematics                     ===
-// ================================================================
-void Forward_K()
-{
-  //TO DO
-  //Update x_e and y_e with the forward kinematics equations.
-  //You can use l_1, l_2 for the lenth of each link and set_point_1 and set_point_2 for the joint angles.
-  x_e = l_1*cos(set_point_1)+l_2*cos(set_point_1+set_point_2);
-  y_e = l_1*sin(set_point_1)+l_2*sin(set_point_1+set_point_2);
-
 }
 
 // ================================================================

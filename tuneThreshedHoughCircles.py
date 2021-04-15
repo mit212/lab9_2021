@@ -17,34 +17,44 @@ tk = Tk()
 global canny, center, dist, d_p
 canny = Scale(tk, from_ = 1, to = 1500, label = 'Upper threshold', orient = HORIZONTAL)
 canny.pack()
+# Edit default value here e.g. canny.set(##)
 canny.set(250)
 center = Scale(tk, from_ = 1, to = 1000, label = 'Center Threshold', orient = HORIZONTAL)
 center.pack()
+# Edit default value here
 center.set(1)
 dist = Scale(tk, from_ = 1, to = 1000, label = 'Min Centers dist', orient = HORIZONTAL)
 dist.pack()
+# Edit default value here
 dist.set(1000)
 d_p = Scale(tk, from_ = 0.1, to = 5, label = 'Accumulator Ratio', orient = HORIZONTAL, resolution = 0.01)
 d_p.pack()
+# Edit default value here
 d_p.set(4)
 global l_h, u_h, l_s, u_s, l_v, u_v
 l_h = Scale(tk, from_ = 0, to = 255, label = 'Hue, lower', orient = HORIZONTAL)
 l_h.pack()
+# Edit default value here
 l_h.set(174)
 u_h = Scale(tk, from_ = 0, to = 255, label = 'Hue, upper', orient = HORIZONTAL)
 u_h.pack()
+# Edit default value here
 u_h.set(199)
 l_s = Scale(tk, from_ = 0, to = 255, label = 'Saturation, lower', orient = HORIZONTAL)
 l_s.pack()
+# Edit default value here
 l_s.set(71)
 u_s = Scale(tk, from_ = 0, to = 255, label = 'Saturation, upper', orient = HORIZONTAL)
 u_s.pack()
+# Edit default value here
 u_s.set(255)
 l_v = Scale(tk, from_ = 0, to = 255, label = 'Value, lower', orient = HORIZONTAL)
 l_v.pack()
+# Edit default value here
 l_v.set(0)
 u_v = Scale(tk, from_ = 0, to = 255, label = 'Value, upper', orient = HORIZONTAL)
 u_v.pack()
+# Edit default value here
 u_v.set(255)
 
 def main():

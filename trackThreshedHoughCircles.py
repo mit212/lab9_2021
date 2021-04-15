@@ -107,7 +107,7 @@ def main():
         arg2 = center.get()       #Threshold for center detection. 
         min_distance = dist.get()    # Minimum distance between new circle centers. 
         dp = d_p.get()             # How accepting to degradation of circles are you willing to be
-        circles = cv2.HoughCircles(grayIm,cv2.HOUGH_GRADIENT,dp,min_distance,param1=arg1,param2=arg2, minRadius=8,maxRadius=11)
+        circles = cv2.HoughCircles(grayIm,cv2.HOUGH_GRADIENT,dp,min_distance,param1=arg1,param2=arg2, minRadius=0,maxRadius=60)
         offset=10     
         if circles is not None:
             circles = np.uint16(np.around(circles,0))

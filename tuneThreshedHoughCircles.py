@@ -109,12 +109,12 @@ def main():
             circles = np.uint16(np.around(circles,0))
             for i in circles[0,:]:
                 # draw circle
-                cv2.circle(resizeIm,(i[0],i[1]),i[2],(0,255,0),2)
-                cv2.circle(resizeIm,(i[0]-offset,i[1]),2,(0,0,255),3) 
-                cv2.circle(resizeIm,(alignmentX,alignmentY),2,(255,0,0),3)               
+                cv2.circle(disp_image_HSV,(4*i[0],4*i[1]),4*i[2],(0,255,0),2)
+                cv2.circle(disp_image_HSV,(4*i[0]-4*offset,4*i[1]),2,(0,0,255),3) 
+                cv2.circle(disp_image_HSV,(4*alignmentX,4*alignmentY),2,(255,0,0),3)               
                 print("Object Radius (pxls): ",i[2],"Object Offset (pxls): ",math.ceil(1.1*i[2]))
 
-        cv2.imshow("Hough Circle Detection", resizeIm)
+        cv2.imshow("Hough Circle Detection", disp_image_HSV)
         cv2.waitKey(3)
 
         

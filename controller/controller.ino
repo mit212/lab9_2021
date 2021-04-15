@@ -31,11 +31,11 @@ const float q2_limit = 161*PI/180; // joint angle limit for q2 (rad)
 // Provide PID controller gains here
 
 float kp_1 = 400.0;
-float kd_1 = 40.0;
+float kd_1 = 0;
 float ki_1 = 0.0;
 
 float kp_2 = 400.0;
-float kd_2 = 40.0;
+float kd_2 = 0;
 float ki_2 = 0.0;
 
 // ================================================================
@@ -100,7 +100,7 @@ float q_1_ik, q_2_ik; // inverse kinematics solutions
 int i = 0; // To generate waypoints of the circular path.
 
 // Convert from pixels to inches
-float objectDiameterPixel=13, objectDiameterMeter=.07;
+float objectRadiusPixel=9,objectDiameterPixel=objectRadiusPixel*2, objectDiameterMeter=.04;
 float scale=objectDiameterMeter/objectDiameterPixel; // meters/pixel
 
 // ================================================================
@@ -129,7 +129,7 @@ void loop() {
   timer = micros();
 
 // Read position command
-  if (timer - prevTime >= PERIOD_MICROS) {
+  if (timer - prevTime >= SERIAL_PERIOD_MICROS) {
         serialComm.receiveSerialData();
         prevTime = timer; // update time
     } 
@@ -149,9 +149,15 @@ void loop() {
     x_e_meas=(serialComm.x-100)*scale+l_1+l_2;
     y_e_meas=(-serialComm.y+62)*scale;
 
+    // Filtered endpoint
     x_e=alpha_ref*x_e+(1-alpha_ref)*x_e_meas;
     y_e=alpha_ref*y_e+(1-alpha_ref)*y_e_meas;
-        
+
+    // No filter on serial read
+    //x_e=x_e_meas;
+    //y_e=y_e_meas;
+
+    // Constant endpoint position
     //x_e=l_1+l_2;
     //y_e=0;
 
@@ -169,7 +175,7 @@ void loop() {
     filt_d_error_1 = alpha * d_error_1 + (1 - alpha) * filt_d_error_1;
     sum_error_1 += error_1 * loop_time;
     error_pre_1 = error_1;
-    motorControl(DIR_1, PWM_1, error_1, d_error_1, sum_error_1, kp_1, kd_1, ki_1);
+    motorControl(DIR_1, PWM_1, error_1, filt_d_error_1, sum_error_1, kp_1, kd_1, ki_1);
 
     // PID controller for motor 2
     error_2 = set_point_2 - q_2;
@@ -178,7 +184,7 @@ void loop() {
     filt_d_error_2 = alpha * d_error_2 + (1 - alpha) * filt_d_error_2;
     sum_error_2 += error_2 * loop_time;
     error_pre_2 = error_2;    
-    motorControl(DIR_2, PWM_2, error_2, d_error_2, sum_error_2, kp_2, kd_2, ki_2);
+    motorControl(DIR_2, PWM_2, error_2, filt_d_error_2, sum_error_2, kp_2, kd_2, ki_2);
 
   // ================================================================
   // ===                    PRINT DATA                            ===
@@ -230,10 +236,10 @@ void motorControl(int DIR_x, int PWM_x, float error, float d_error, float sum_er
   
     Pcontrol = error * kp_x;
     Icontrol = sum_error * ki_x;
-    Dcontrol = d_error * kd_x;
-
-    Icontrol = constrain(Icontrol, -200, 200);  // I control saturation limits for anti-windup
-
+    Dcontrol = 0;//d_error * kd_x; //Zero because the camera is too noisy
+    
+    Icontrol = constrain(Icontrol, -200, 200);  // I control saturation limits for anti-windup  
+    
     pwm_command = Pcontrol + Icontrol + Dcontrol;
     
      if (pwm_command > 0)

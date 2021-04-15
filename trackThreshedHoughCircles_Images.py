@@ -63,7 +63,7 @@ u_v.set(255)
 
 def main():
     # convert ROS image to opencv format
-    cap = cv2.VideoCapture(0)
+    #cap = cv2.VideoCapture(0)
 
 
     while True:

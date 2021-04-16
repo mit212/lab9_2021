@@ -31,11 +31,11 @@ const float q2_limit = 161*PI/180; // joint angle limit for q2 (rad)
 // Provide PID controller gains here
 
 float kp_1 = 400.0;
-float kd_1 = 0;
+float kd_1 = 40;
 float ki_1 = 0.0;
 
 float kp_2 = 400.0;
-float kd_2 = 0;
+float kd_2 = 40;
 float ki_2 = 0.0;
 
 // ================================================================

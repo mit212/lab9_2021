@@ -221,8 +221,13 @@ void Inverse_K()
   q_1_ik = atan2(y_e,x_e) - atan2(l_2*sin(q_2_ik),l_1+l_2*cos(q_2_ik));
   
   // position limit constraints (update set_point_1 and set_point_2 when the solutions are within the limits)
-  if (-q2_limit< q_2_ik < q2_limit) set_point_2 = q_2_ik;
-  if (-q1_limit< q_1_ik < q1_limit) set_point_1 = q_1_ik;
+  //if (-q2_limit< q_2_ik < q2_limit) set_point_2 = q_2_ik;
+  //if (-q1_limit< q_1_ik < q1_limit) set_point_1 = q_1_ik;
+	if(abs(q_1_ik)<q1_limit && abs(q_2_ik)<q2_limit)
+	 {
+		 set_point_1 = q_1_ik;
+		 set_point_2 = q_2_ik;  
+	 }
 
 }
 
@@ -236,7 +241,7 @@ void motorControl(int DIR_x, int PWM_x, float error, float d_error, float sum_er
   
     Pcontrol = error * kp_x;
     Icontrol = sum_error * ki_x;
-    Dcontrol = 0;//d_error * kd_x; //Zero because the camera is too noisy
+    Dcontrol = d_error * kd_x; //Zero because the camera is too noisy
     
     Icontrol = constrain(Icontrol, -200, 200);  // I control saturation limits for anti-windup  
     
